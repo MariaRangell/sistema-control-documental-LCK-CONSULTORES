@@ -76,14 +76,14 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     setMousePosition({
       x: (e.clientX / window.innerWidth - 0.5) * 20,
       y: (e.clientY / window.innerHeight - 0.5) * 20
     });
   };
 
-  const navigateTo = (section, event) => {
+  const navigateTo = (section: string, event: React.MouseEvent<HTMLDivElement>) => {
     const element = event.currentTarget;
     element.style.transform = 'scale(0.95)';
     
