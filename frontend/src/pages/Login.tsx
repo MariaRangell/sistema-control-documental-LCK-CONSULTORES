@@ -30,10 +30,20 @@ function Login() {
     const validUsers: ValidUsers = {
       'admin': 'admin123',
       'usuario': 'password123',
-      'documental': 'doc2024'
+      'rh': 'doc2024'
     };
 
     if (validUsers[username] && validUsers[username] === password) {
+      // Asignar rol y nombre según el usuario
+      let userData = {};
+      if (username === 'admin') {
+        userData = { nombre: 'Administrador', rol: 'admin' };
+      } else if (username === 'usuario') {
+        userData = { nombre: 'Usuario', rol: 'user' };
+      } else if (username === 'rh') {
+        userData = { nombre: 'RH', rol: 'viewer' };
+      }
+      localStorage.setItem('user', JSON.stringify(userData));
       setTimeout(() => {
         setLoading(false);
         navigate('/dashboard');
