@@ -1,5 +1,5 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
-import { FileText, Users, Clock, CheckCircle, Building2, UserCheck, BarChart3, Settings, Handshake, Package } from 'lucide-react';
+import { FileText, Users, Clock, CheckCircle, Building2, UserCheck, BarChart3, Settings, Handshake, Package, DollarSign, FolderOpen, Monitor } from 'lucide-react';
 
 // Tipos para los stats y menú
 interface StatItem {
@@ -40,8 +40,8 @@ const statsByRole: Record<UserRole, StatItem[]> = {
 const menuItemsByRole: Record<UserRole, MenuItem[]> = {
   admin: [
     { id: 'empresa', title: 'Empresa', description: 'Gestión de información corporativa y datos de la organización', icon: Building2, bgGradient: 'bg-gradient-to-br from-gray-800/80 to-gray-900/80' },
-    { id: 'personal', title: 'Personal', description: 'Administración de recursos humanos y documentación del personal', icon: UserCheck, bgGradient: 'bg-gradient-to-br from-gray-600/80 to-red-700/80' },
     { id: 'auditoria', title: 'Auditoría', description: 'Control y seguimiento de procesos de auditoría interna', icon: BarChart3, bgGradient: 'bg-gradient-to-br from-gray-700/80 to-gray-900/80' },
+    { id: 'personal', title: 'Información Personal', description: 'Gestión de tu información y documentación personal', icon: UserCheck, bgGradient: 'bg-gradient-to-br from-gray-600/80 to-red-700/80' },
     { id: 'configuracion', title: 'Configuración', description: 'Ajustes del sistema y parámetros de configuración', icon: Settings, bgGradient: 'bg-gradient-to-br from-red-700/80 to-gray-800/80' },
     { id: 'clientes', title: 'Clientes', description: 'Gestión de base de datos y documentación de clientes', icon: Handshake, bgGradient: 'bg-gradient-to-br from-red-600/80 to-red-800/80' },
     { id: 'proveedores', title: 'Proveedores', description: 'Administración de proveedores y documentación comercial', icon: Package, bgGradient: 'bg-gradient-to-br from-red-800/80 to-gray-900/80' },
@@ -52,8 +52,10 @@ const menuItemsByRole: Record<UserRole, MenuItem[]> = {
     { id: 'configuracion', title: 'Configuración', description: 'Ajustes de tu cuenta y preferencias', icon: Settings, bgGradient: 'bg-gradient-to-br from-red-700/80 to-gray-800/80' },
   ],
   viewer: [
-    { id: 'documentos', title: 'Ver Documentos', description: 'Acceso a documentos disponibles', icon: FileText, bgGradient: 'bg-gradient-to-br from-gray-800/80 to-gray-900/80' },
-    { id: 'historial', title: 'Historial', description: 'Historial de documentos vistos', icon: Clock, bgGradient: 'bg-gradient-to-br from-gray-600/80 to-red-700/80' },
+    { id: 'contratos', title: 'Contratos', description: 'Altas/Bajas • Carga/Descarga • Pendientes • Base de Datos', icon: FileText, bgGradient: 'bg-gradient-to-br from-red-600/80 to-red-800/80' },
+    { id: 'nomina', title: 'Nómina', description: 'Carga/Descarga • Administración • Recibos • Discrepancias', icon: DollarSign, bgGradient: 'bg-gradient-to-br from-red-700/80 to-gray-900/80' },
+    { id: 'expedientes', title: 'Expedientes', description: 'Organigrama • Instalaciones • Inventarios • Activos', icon: FolderOpen, bgGradient: 'bg-gradient-to-br from-gray-800/80 to-red-700/80' },
+    { id: 'equipos', title: 'Equipos', description: 'Altas/Bajas • Inventario • Asignación • Status', icon: Monitor, bgGradient: 'bg-gradient-to-br from-red-800/80 to-gray-900/80' },
   ],
 };
 
@@ -167,10 +169,49 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {menuItems.map((item: MenuItem, index: number) => {
             const IconComponent = item.icon;
+            
+            // Definir subapartados para RH
+            const getSubItems = (itemId: string) => {
+              switch(itemId) {
+                case 'contratos':
+                  return [
+                    { name: 'Altas/Bajas', icon: '👥' },
+                    { name: 'Carga/Descarga', icon: '📤' },
+                    { name: 'Pendientes', icon: '⏳' },
+                    { name: 'Base de Datos', icon: '🗄️' }
+                  ];
+                case 'nomina':
+                  return [
+                    { name: 'Carga/Descarga', icon: '📤' },
+                    { name: 'Administración', icon: '⚙️' },
+                    { name: 'Recibos', icon: '🧾' },
+                    { name: 'Discrepancias', icon: '⚠️' }
+                  ];
+                case 'expedientes':
+                  return [
+                    { name: 'Organigrama', icon: '🏢' },
+                    { name: 'Instalaciones', icon: '🏭' },
+                    { name: 'Inventarios', icon: '📋' },
+                    { name: 'Activos', icon: '💼' }
+                  ];
+                case 'equipos':
+                  return [
+                    { name: 'Altas/Bajas', icon: '👥' },
+                    { name: 'Inventario', icon: '📋' },
+                    { name: 'Asignación', icon: '🎯' },
+                    { name: 'Status', icon: '📊' }
+                  ];
+                default:
+                  return [];
+              }
+            };
+
+            const subItems = getSubItems(item.id);
+            
             return (
               <div
                 key={item.id}
-                className={`group relative min-h-48 ${item.bgGradient} backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:bg-gray-800/40 hover:border-red-500/30 ${
+                className={`group relative min-h-48 ${item.bgGradient} backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:bg-gray-800/40 hover:border-red-500/30 overflow-hidden ${
                   animatedItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                 }`}
                 style={{ transitionDelay: `${(index + 4) * 100}ms` }}
@@ -179,7 +220,30 @@ export default function Dashboard() {
                 {/* Hover effect overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -translate-x-full group-hover:translate-x-full rounded-2xl"></div>
                 
-                <div className="relative z-10 flex flex-col items-center text-center h-full justify-center">
+                {/* Subapartados overlay - aparece en hover */}
+                {subItems.length > 0 && (
+                  <div className="absolute inset-0 bg-black/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-2xl flex flex-col justify-center items-center p-6 z-20">
+                    <h4 className="text-white text-lg font-semibold mb-4 text-center">
+                      {item.title}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3 w-full">
+                      {subItems.map((subItem, subIndex) => (
+                        <div
+                          key={subIndex}
+                          className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 hover:bg-white/20 transition-all duration-200"
+                          style={{ animationDelay: `${subIndex * 100}ms` }}
+                        >
+                          <span className="text-lg">{subItem.icon}</span>
+                          <span className="text-white text-xs font-medium truncate">
+                            {subItem.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="relative z-10 flex flex-col items-center text-center h-full justify-center group-hover:opacity-0 transition-opacity duration-300">
                   <div className="mb-4 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                     <IconComponent className="h-12 w-12 text-white group-hover:text-red-400" />
                   </div>

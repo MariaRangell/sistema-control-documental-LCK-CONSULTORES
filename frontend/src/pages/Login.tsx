@@ -30,7 +30,8 @@ function Login() {
     const validUsers: ValidUsers = {
       'admin': 'admin123',
       'usuario': 'password123',
-      'rh': 'doc2024'
+      'rh': 'doc2024',
+      'auditor': 'auditor2024',
     };
 
     if (validUsers[username] && validUsers[username] === password) {
@@ -42,6 +43,7 @@ function Login() {
         userData = { nombre: 'Usuario', rol: 'user' };
       } else if (username === 'rh') {
         userData = { nombre: 'RH', rol: 'viewer' };
+      } else if (username === 'auditor') {
       }
       localStorage.setItem('user', JSON.stringify(userData));
       setTimeout(() => {
