@@ -5,7 +5,7 @@ type User = {
   id: number
   name: string
   email: string
-  role: 'admin' | 'user' | 'viewer'
+  role: 'admin' | 'user' | 'viewer' | 'cliente' | 'proveedor' 
   status: 'active' | 'inactive'
   lastLogin: string
 }
@@ -34,7 +34,24 @@ const users: User[] = [
     role: 'viewer',
     status: 'inactive',
     lastLogin: '2024-03-14 16:45'
-  }
+  },
+  {
+    id: 4,
+    name: 'María García',
+    email: 'maria.garcia@lck.com',
+    role: 'cliente',
+    status: 'active',
+    lastLogin: '2024-03-15 09:15'
+  },
+  ,
+  {
+    id: 5,
+    name: 'María García',
+    email: 'maria.garcia@lck.com',
+    role: 'proveedor',
+    status: 'active',
+    lastLogin: '2024-03-15 09:15'
+  },
 ]
 
 const roleColors = {

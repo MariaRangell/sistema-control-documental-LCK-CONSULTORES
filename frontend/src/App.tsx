@@ -8,6 +8,7 @@ import Documents from './pages/Documents';
 import Users from './pages/Users';
 import Settings from './pages/Settings';
 
+
 function App() {
   return (
     <Router>
@@ -20,6 +21,8 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   )
