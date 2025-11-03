@@ -28,6 +28,16 @@ app.use(limiter); // Rate limiting
 // Servir archivos estáticos
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Importar rutas
+import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
+import driveRoutes from './routes/driveRoutes';
+
+// Usar rutas
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/drive', driveRoutes);
+
 // Rutas básicas
 app.get('/', (req, res) => {
   res.json({ mensaje: 'API del Sistema de Control Documental' });

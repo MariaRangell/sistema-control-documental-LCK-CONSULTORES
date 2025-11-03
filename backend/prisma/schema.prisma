@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,18 +7,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  nombre    String
-  apellido  String
-  rol       String   @default("usuario")
-  activo    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model usuarios {
+  id                        Int          @id @default(autoincrement())
+  nombre_usuario            String       @unique @db.VarChar(50)
+  correo                    String       @unique @db.VarChar(100)
+  nombre_completo           String       @db.VarChar(100)
+  contrasena                String       @map("contraseña") @db.VarChar(255)
+  rol                       UserRole     @default(user)
+  empresa_asignada          CompanyType?
+  activo                    Boolean      @default(true)
+  ultimo_login              DateTime?
+  fecha_creacion            DateTime     @default(now())
+  fecha_actualizacion       DateTime     @default(now()) @updatedAt
+  intentos_fallidos         Int          @default(0)
+  bloqueado_hasta           DateTime?
+  fecha_ultimo_intento      DateTime?
+  email_verificado          Boolean      @default(false)
+  token_verificacion        String?      @db.VarChar(255)
+  token_expira              DateTime?
+  esta_online               Boolean?     @default(false)
+  ultima_actividad          DateTime?
+  ip_ultima_conexion        String?      @db.VarChar(45)
+  navegador_ultima_conexion String?
+  ubicacion_ultima_conexion String?      @db.VarChar(255)
 
-  documentos Documento[]
+  // Relación opcional a Empresa (nueva tabla)
+  empresaId                 Int?
+  empresa                   Empresa?     @relation(fields: [empresaId], references: [id])
+
+  Documento                 Documento[]
+
+  @@map("usuarios")
+}
+
+model Categoria {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
+  descripcion String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
 }
 
 model Documento {
@@ -35,16 +56,36 @@ model Documento {
   tipo        String
   estado      String   @default("pendiente")
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  updatedAt   DateTime
   usuarioId   Int
-  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarios    usuarios @relation(fields: [usuarioId], references: [id])
 }
 
-model Categoria {
-  id          Int      @id @default(autoincrement())
-  nombre      String   @unique
-  descripcion String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum CompanyType {
+  empresa
+  cliente
+  proveedor
+}
+
+enum UserRole {
+  admin
+  empresa
+  proveedor
+  rh
+  cliente
+  auditoria
+  user
+}
+
+model Empresa {
+  id              Int      @id @default(autoincrement())
+  nombre          String
+  rfc             String   @unique
+  domicilioFiscal String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  usuarios        usuarios[]
+
+  @@map("empresa")
 }

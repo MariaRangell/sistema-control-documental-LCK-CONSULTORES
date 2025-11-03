@@ -1,13 +1,23 @@
 import app from './app';
 import prisma from './config/database';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 
 // Función para verificar la conexión a la base de datos
 async function verificarConexionDB() {
   try {
     await prisma.$connect();
     console.log('✅ Conexión a la base de datos establecida');
+    // Asegurar empresa LCK por defecto
+    await prisma.empresa.upsert({
+      where: { rfc: 'LCO131230GP5' },
+      update: {},
+      create: {
+        nombre: 'LCK CONSULTORES S.A. DE C.V.',
+        rfc: 'LCO131230GP5',
+        domicilioFiscal: 'Querétaro, Qro.'
+      }
+    });
     return true;
   } catch (error) {
     console.error('❌ Error al conectar con la base de datos:', error);

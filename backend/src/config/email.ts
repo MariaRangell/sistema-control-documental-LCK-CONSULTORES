@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Configuración del transporter de nodemailer
+// Configuración del transporter de nodemailer (SMTP)
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),
@@ -12,9 +12,22 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  authMethod: 'LOGIN',
+  logger: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === 'development',
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
-// Función para enviar emails
+transporter.verify((err, success) => {
+  if (err) {
+    console.error('❌ SMTP verify error:', err);
+  } else {
+    console.log('✅ SMTP listo para enviar correos');
+  }
+});
+
 export const enviarEmail = async (
   destinatario: string,
   asunto: string,
