@@ -1,4 +1,5 @@
 import React, { useState, FormEvent, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // TypeScript interfaces
 interface Document {
@@ -19,7 +20,248 @@ interface FormData {
   docDescription: string;
 }
 
+interface LocationState {
+  seccion?: string;
+  tipo?: string;
+  rol?: string;
+}
+
+type UserRole = 'admin' | 'rh' | 'cliente' | 'proveedor' | 'empresa' | 'auditoria';
+
+// NUEVA ESTRUCTURA: Menús organizados por ROL y luego por SECCIÓN
+const menusPorRol: Record<UserRole, Record<string, Array<{ id: string; label: string; icon: string }>>> = {
+  empresa: {
+    finanzas: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'tesoreria', label: 'Tesorería', icon: '💰' },
+      { id: 'sat', label: 'SAT', icon: '🏛️' },
+      { id: 'secretaria-finanzas', label: 'Secretaría de Finanzas', icon: '🧾' },
+      { id: 'balances', label: 'Balances', icon: '⚖️' }
+    ],
+    legal: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'permisos', label: 'Permisos', icon: '🧾' },
+      { id: 'lineamientos', label: 'Lineamientos', icon: '📋' },
+      { id: 'sat', label: 'SAT', icon: '🏛️' },
+      { id: 'repse', label: 'Aviso de Registro REPSE', icon: '📤' }
+    ],
+    infraestructura: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'organigrama', label: 'Organigrama', icon: '🏢' },
+      { id: 'instalaciones', label: 'Instalaciones', icon: '🏭' },
+      { id: 'inventarios', label: 'Inventarios', icon: '📋' },
+      { id: 'activos', label: 'Activos', icon: '💼' }
+    ],
+    facturacion: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'altas-bajas', label: 'Altas/Bajas', icon: '👥' },
+      { id: 'carga-descarga', label: 'Carga/Descarga', icon: '📤' },
+      { id: 'base-datos', label: 'Base de Datos', icon: '🗄️' },
+      { id: 'refacturacion', label: 'Refacturación', icon: '📋' }
+    ]
+  },
+  
+  rh: {
+    contratos: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'altas-bajas', label: 'Altas/Bajas', icon: '📊' },
+      { id: 'carga-descarga', label: 'Carga/Descarga', icon: '📁' },
+      { id: 'pendientes', label: 'Pendientes', icon: '⏳' },
+      { id: 'base-datos', label: 'Base de Datos', icon: '💾' }
+    ],
+    nomina: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'carga-descarga', label: 'Carga/Descarga', icon: '📤' },
+      { id: 'administracion', label: 'Administración', icon: '⚙️' },
+      { id: 'recibos', label: 'Recibos', icon: '🧾' },
+      { id: 'discrepancias', label: 'Discrepancias', icon: '⚠️' }
+    ],
+    expedientes: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'organigrama', label: 'Organigrama', icon: '🏢' },
+      { id: 'instalaciones', label: 'Instalaciones', icon: '🏭' },
+      { id: 'inventarios', label: 'Inventarios', icon: '📋' },
+      { id: 'activos', label: 'Activos', icon: '💼' }
+    ],
+    equipos: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'altas-bajas', label: 'Altas/Bajas', icon: '👥' },
+      { id: 'inventario', label: 'Inventario', icon: '📋' },
+      { id: 'asignacion', label: 'Asignación', icon: '🎯' },
+      { id: 'status', label: 'Status', icon: '📊' }
+    ]
+  },
+  
+  auditoria: {
+    monitoreo: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'rendimiento', label: 'Rendimiento', icon: '📊' },
+      { id: 'procesos', label: 'Procesos', icon: '📤' },
+      { id: 'alertas', label: 'Alertas', icon: '⚠️' },
+      { id: 'reportes', label: 'Reportes', icon: '🎯' }
+    ],
+    accesos: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'conexiones', label: 'Conexiones', icon: '⚙️' },
+      { id: 'consultas', label: 'Consultas', icon: '📋' },
+      { id: 'bajas', label: 'Bajas', icon: '👥' },
+      { id: 'restricciones', label: 'Restricciones', icon: '⚠️' }
+    ],
+    'base-datos': [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'database', label: 'Base de Datos', icon: '🗄️' },
+      { id: 'administracion', label: 'Administración', icon: '💼' },
+      { id: 'reportar', label: 'Reportar', icon: '⚠️' },
+      { id: 'capacidad', label: 'Capacidad', icon: '✅' }
+    ],
+    discrepancias: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'cargas', label: 'Cargas', icon: '📤' },
+      { id: 'estatus', label: 'Estatus de los Archivos', icon: '✅' },
+      { id: 'modificaciones', label: 'Modificaciones', icon: '📋' },
+      { id: 'avisos', label: 'Avisos', icon: '⚠️' }
+    ]
+  },
+  
+  cliente: {
+    contratos: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'altas-bajas', label: 'Altas/Bajas', icon: '📊' },
+      { id: 'carga-descarga', label: 'Carga/Descarga', icon: '📁' },
+      { id: 'base-datos', label: 'Base de Datos', icon: '💾' },
+      { id: 'cumplimiento', label: 'Cumplimiento', icon: '✅' }
+    ],
+    facturas: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'carga-descarga', label: 'Carga/Descarga', icon: '📁' },
+      { id: 'administracion', label: 'Administración', icon: '⚙️' },
+      { id: 'pendientes', label: 'Pendientes', icon: '⏳' },
+      { id: 'discrepancias', label: 'Discrepancias', icon: '⚠️' }
+    ],
+    expedientes: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'acta-constitutiva', label: 'Acta Constitutiva', icon: '📄' },
+      { id: 'constancia-fiscal', label: 'Constancia de Situación Fiscal', icon: '📋' },
+      { id: 'servicios', label: 'Servicios', icon: '🔧' }
+    ],
+    contabilidad: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'balances', label: 'Balances', icon: '⚖️' },
+      { id: 'pagos', label: 'Pagos', icon: '💳' },
+      { id: 'pendientes', label: 'Pendientes', icon: '⏳' },
+      { id: 'impuestos', label: 'Impuestos', icon: '🏛️' }
+    ]
+  },
+  
+  proveedor: {
+    contratos: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'altas-bajas', label: 'Altas/Bajas', icon: '📊' },
+      { id: 'carga-descarga', label: 'Carga/Descarga', icon: '📁' },
+      { id: 'base-datos', label: 'Base de Datos', icon: '💾' },
+      { id: 'cumplimiento', label: 'Cumplimiento', icon: '✅' }
+    ],
+    facturas: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'carga-descarga', label: 'Carga/Descarga', icon: '📁' },
+      { id: 'administracion', label: 'Administración', icon: '⚙️' },
+      { id: 'pendientes', label: 'Pendientes', icon: '⏳' },
+      { id: 'discrepancias', label: 'Discrepancias', icon: '⚠️' }
+    ],
+    expedientes: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'acta-constitutiva', label: 'Acta Constitutiva', icon: '📄' },
+      { id: 'constancia-fiscal', label: 'Constancia de Situación Fiscal', icon: '📋' },
+      { id: 'servicios', label: 'Servicios', icon: '🔧' }
+    ],
+    contabilidad: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'balances', label: 'Balances', icon: '⚖️' },
+      { id: 'pagos', label: 'Pagos', icon: '💳' },
+      { id: 'pendientes', label: 'Pendientes', icon: '⏳' },
+      { id: 'impuestos', label: 'Impuestos', icon: '🏛️' }
+    ]
+  },
+  
+  // Para el rol admin, incluye acceso a todo
+  admin: {
+    empresa: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'finanzas', label: 'Finanzas', icon: '💰' },
+      { id: 'legal', label: 'Legal', icon: '⚖️' },
+      { id: 'infraestructura', label: 'Infraestructura', icon: '🏢' },
+      { id: 'facturacion', label: 'Facturación', icon: '📋' }
+    ],
+    auditoria: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'monitoreo', label: 'Monitoreo', icon: '📊' },
+      { id: 'accesos', label: 'Accesos', icon: '🔑' },
+      { id: 'base-datos', label: 'Base de Datos', icon: '🗄️' },
+      { id: 'discrepancias', label: 'Discrepancias', icon: '⚠️' }
+    ],
+    personal: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'contratos', label: 'Contratos', icon: '📋' },
+      { id: 'expedientes', label: 'Expedientes', icon: '📋' },
+      { id: 'nomina', label: 'Nómina', icon: '💰' },
+      { id: 'equipos', label: 'Equipos', icon: '💻' }
+    ],
+    configuracion: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'accesos', label: 'Accesos', icon: '🔑' },
+      { id: 'sistema', label: 'Sistema', icon: '⚙️' }
+    ],
+    clientes: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'contratos', label: 'Contratos', icon: '👥' },
+      { id: 'facturas', label: 'Facturas', icon: '📋' },
+      { id: 'expedientes', label: 'Expedientes', icon: '💼' },
+      { id: 'contabilidad', label: 'Contabilidad', icon: '💰' }
+    ],
+    proveedores: [
+      { id: 'todos', label: 'Todos los documentos', icon: '📋' },
+      { id: 'contratos', label: 'Contratos', icon: '👥' },
+      { id: 'facturas', label: 'Facturas', icon: '📋' },
+      { id: 'expedientes', label: 'Expedientes', icon: '💼' },
+      { id: 'contabilidad', label: 'Contabilidad', icon: '💰' }
+    ]
+  }
+};
+
 const DocumentControlSystem: React.FC = () => {
+  const location = useLocation();
+  const state = location.state as LocationState;
+  
+  // Obtener el rol del usuario desde localStorage
+  const [userRole, setUserRole] = useState<UserRole>('empresa');
+  
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const { rol } = JSON.parse(userData);
+      if (rol) {
+        setUserRole(rol);
+      }
+    }
+  }, []);
+  
+  // Estado para la sección y tipo actual
+  const [seccion, setSeccion] = useState(state?.seccion || 'finanzas');
+  const [tipoActivo, setTipoActivo] = useState(state?.tipo || 'todos');
+  const [menuActual, setMenuActual] = useState<Array<{ id: string; label: string; icon: string }>>([]);
+
+  // Actualiza el menú cuando cambia la sección o el rol
+  useEffect(() => {
+    if (state?.seccion) {
+      setSeccion(state.seccion);
+      setTipoActivo(state.tipo || 'todos');
+    }
+    
+    // Obtener el menú correcto según el rol y la sección
+    const menu = menusPorRol[userRole]?.[seccion] || [];
+    setMenuActual(menu);
+  }, [state, seccion, userRole]);
+
   const [documents, setDocuments] = useState<Document[]>([
     {
       id: 1,
@@ -129,6 +371,14 @@ const DocumentControlSystem: React.FC = () => {
     return colors[status] || '#6c757d';
   };
 
+  // Formatea el nombre de la sección
+  const formatearNombreSeccion = (nombre: string): string => {
+    return nombre
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   // Event handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -141,6 +391,21 @@ const DocumentControlSystem: React.FC = () => {
   const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(e.target.value);
   };
+
+  const handleCategoriaClick = (tipo: string) => {
+    setTipoActivo(tipo);
+    console.log(`Mostrando documentos de ${userRole} - ${seccion} - ${tipo}`);
+  };
+
+  const cambiarSeccion = (nuevaSeccion: string) => {
+    setSeccion(nuevaSeccion);
+    const menu = menusPorRol[userRole]?.[nuevaSeccion] || [];
+    setMenuActual(menu);
+    setTipoActivo('todos');
+  };
+
+  // Obtener todas las secciones disponibles para el rol actual
+  const seccionesDisponibles = Object.keys(menusPorRol[userRole] || {}).filter(s => s !== seccion);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -379,6 +644,8 @@ const DocumentControlSystem: React.FC = () => {
             color: #333;
             margin-bottom: 20px;
             font-size: 1.2rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #DC143C;
         }
 
         .sidebar ul {
@@ -389,7 +656,9 @@ const DocumentControlSystem: React.FC = () => {
             margin-bottom: 15px;
         }
 
+        .sidebar button,
         .sidebar a {
+            width: 100%;
             color: #6c757d;
             text-decoration: none;
             display: flex;
@@ -398,17 +667,40 @@ const DocumentControlSystem: React.FC = () => {
             border-radius: 15px;
             transition: all 0.3s ease;
             cursor: pointer;
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-size: 14px;
+            gap: 10px;
         }
 
+        .sidebar button:hover,
         .sidebar a:hover {
             background: rgba(220, 20, 60, 0.1);
             color: #DC143C;
             transform: translateX(5px);
         }
 
+        .sidebar button.active,
         .sidebar a.active {
             background: linear-gradient(135deg, #DC143C, #B22222);
             color: white;
+            font-weight: 600;
+        }
+
+        .otras-secciones {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .otras-secciones h4 {
+            font-size: 0.85rem;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding: 0 15px;
+            letter-spacing: 1px;
         }
 
         .content-area {
@@ -609,6 +901,23 @@ const DocumentControlSystem: React.FC = () => {
             color: #DC143C;
         }
 
+        .breadcrumb {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .breadcrumb span {
+            color: #DC143C;
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -675,26 +984,51 @@ const DocumentControlSystem: React.FC = () => {
 
         <div className="main-content">
           <aside className="sidebar">
-            <h3>📂 Categorías</h3>
+            {/* Título dinámico según la sección */}
+            <h3>📂 {formatearNombreSeccion(seccion)}</h3>
+            
+            {/* Menú dinámico según el rol y la sección */}
             <ul>
-              <li><a href="#" className="active">📋 Todos los documentos</a></li>
-              <li><a href="#">🏢 Empresa</a></li>
-              <li><a href="#">👨 Recursos Humanos</a></li>
-              <li><a href="#">🔍 Auditoria</a></li>
-              <li><a href="#">👥 Clientes</a></li>
-              <li><a href="#">🛒 Proveedores</a></li>
+              {menuActual.map((item) => (
+                <li key={item.id}>
+                  <button
+                    onClick={() => handleCategoriaClick(item.id)}
+                    className={tipoActivo === item.id ? 'active' : ''}
+                  >
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              ))}
             </ul>
 
-            <h3>⚡ Acciones rápidas</h3>
-            <ul>
-              <li><a href="#">📤 Subir documento</a></li>
-              <li><a href="#">🔄 Sincronizar</a></li>
-              <li><a href="#">📊 Generar reporte</a></li>
-              <li><a href="#">⚙️ Configuración</a></li>
-            </ul>
+            {/* Otras secciones disponibles para el rol actual */}
+            {seccionesDisponibles.length > 0 && (
+              <div className="otras-secciones">
+                <h4>Otras Secciones</h4>
+                <ul>
+                  {seccionesDisponibles.map((s) => (
+                    <li key={s}>
+                      <button onClick={() => cambiarSeccion(s)}>
+                        {formatearNombreSeccion(s)}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </aside>
 
           <main className="content-area">
+            {/* Breadcrumb para mostrar la ruta actual */}
+            <div className="breadcrumb">
+              <span>{formatearNombreSeccion(userRole)}</span>
+              <span>›</span>
+              <span>{formatearNombreSeccion(seccion)}</span>
+              <span>›</span>
+              <span>{formatearNombreSeccion(tipoActivo)}</span>
+            </div>
+
             <div className="stats-bar">
               <div className="stat-card">
                 <div className="stat-number">1,247</div>
@@ -713,6 +1047,10 @@ const DocumentControlSystem: React.FC = () => {
                 <div className="stat-label">Cumplimiento</div>
               </div>
             </div>
+
+            <h2 style={{ marginBottom: '20px', color: '#333' }}>
+              Documentos de {formatearNombreSeccion(tipoActivo)}
+            </h2>
 
             <div className="document-grid">
               {filteredDocuments.map(doc => (

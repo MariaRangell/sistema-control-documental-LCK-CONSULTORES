@@ -90,12 +90,12 @@ const menuItemsByRole: Record<UserRole, MenuItem[]> = {
     { id: 'finanzas', title: 'Finanzas', description: 'Tesorería • SAT • Secretaría de Finanzas • Balances', icon: DollarSign, bgGradient: 'bg-gradient-to-br from-red-600/80 to-red-800/80' },
     { id: 'legal', title: 'Legal', description: ' • Permisos • Lineamientos• SAT• Aviso de Registro REPSE', icon: Scale, bgGradient: 'bg-gradient-to-br from-red-700/80 to-gray-900/80' },
     { id: 'infraestructura', title: 'Infraestructura', description: 'Organigrama • Instalaciones • Inventarios • Activos', icon: Building2, bgGradient: 'bg-gradient-to-br from-gray-800/80 to-red-700/80' },
-    { id: 'facturación', title: 'Facturación', description: 'Altas/Bajas • Carga/Descarga • Base de Datos • Refacturación', icon: FileDigitIcon, bgGradient: 'bg-gradient-to-br from-red-800/80 to-gray-900/80' },
+    { id: 'facturacion', title: 'Facturación', description: 'Altas/Bajas • Carga/Descarga • Base de Datos • Refacturación', icon: FileDigitIcon, bgGradient: 'bg-gradient-to-br from-red-800/80 to-gray-900/80' },
   ],
   auditoria: [
     { id: 'monitoreo', title: 'Monitoreo', description: 'Rendimiento • Alertas • Reportes', icon: FileClock, bgGradient: 'bg-gradient-to-br from-red-600/80 to-red-800/80' },
     { id: 'accesos', title: 'Accesos', description: 'Conexiones • Consultas • Bajas • Restricciones', icon: FolderKey, bgGradient: 'bg-gradient-to-br from-red-700/80 to-gray-900/80' },
-    { id: 'base de datos', title: 'Base de Datos', description: 'Base de Datos • Administración • Reportar • Capacidad', icon: Database, bgGradient: 'bg-gradient-to-br from-gray-800/80 to-red-700/80' },
+    { id: 'base-datos', title: 'Base de Datos', description: 'Base de Datos • Administración • Reportar • Capacidad', icon: Database, bgGradient: 'bg-gradient-to-br from-gray-800/80 to-red-700/80' },
     { id: 'discrepancias', title: 'Discrepancias', description: 'Cargas • Estatus de Archivos • Modificaciones • Avisos', icon: ArrowLeftRight, bgGradient: 'bg-gradient-to-br from-red-800/80 to-gray-900/80' },
   ]
 };
@@ -240,7 +240,7 @@ export default function Dashboard() {
           { name: 'SAT', icon: '🏛️', href: '/empresa/legal/sat' },
           { name: 'Aviso de registro REPSE', icon: '📤', href: '/empresa/legal/repse' },
         ];   
-      case 'facturación':
+      case 'facturacion':
         return [
           { name: 'Altas/Bajas', icon: '👥', href: '/empresa/facturacion/altas-bajas' },
           { name: 'Carga/Descarga', icon: '📤', href: '/empresa/facturacion/carga' },
@@ -263,7 +263,7 @@ export default function Dashboard() {
           { name: 'Bajas', icon: '👥', href: '/auditoria/accesos/bajas' },
           { name: 'Restricciones', icon: '⚠️', href: '/auditoria/accesos/restricciones' },
         ];           
-      case 'base de datos':
+      case 'base-datos':
         return [
           { name: 'Base de Datos', icon: '🗄️', href: '/auditoria/base-datos/database' },
           { name: 'Administración', icon: '💼', href: '/auditoria/base-datos/admin' },
@@ -397,8 +397,16 @@ export default function Dashboard() {
                 className={`group relative min-h-48 ${item.bgGradient} backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 cursor-pointer transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:bg-gray-800/40 hover:border-red-500/30 overflow-hidden ${
                   animatedItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
                 }`}
-                style={{ transitionDelay: `${(index + 4) * 100}ms` }}
-                onClick={(e) => navigateTo(item.id, e)}
+                  style={{ transitionDelay: `${(index + 4) * 100}ms` }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Click en la tarjeta principal - navega con la sección
+                  navigate('/menu', { 
+                    state: { 
+                      seccion: item.id
+                    } 
+                  });
+                }}
               >
                 {/* Hover effect overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform -translate-x-full group-hover:translate-x-full rounded-2xl"></div>
@@ -417,7 +425,13 @@ export default function Dashboard() {
                           style={{ animationDelay: `${subIndex * 100}ms` }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/menu');
+                            // Click en un subitem específico - navega con sección y tipo
+                            navigate('/menu', { 
+                              state: { 
+                                seccion: item.id,
+                                tipo: subItem.name.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '-')
+                              } 
+                            });
                           }}
                         >
                           <span className="text-lg">{subItem.icon}</span>

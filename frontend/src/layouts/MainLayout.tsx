@@ -23,7 +23,7 @@ type SubItem = { name: string; icon: string; href?: string }
 // Menú por rol (ADMIN compacto y agrupado)
 const navByRole: NavByRole = {
   admin: [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Menú Principal', href: '/', icon: LayoutDashboard },
     { name: 'Documentos', href: '/documents', icon: FileText },
     { name: 'Administración', href: '#', icon: Users },
     { name: 'Auditoría', href: '#', icon: FolderKey },
@@ -31,28 +31,28 @@ const navByRole: NavByRole = {
     { name: 'Configuración', href: '#', icon: Settings },
   ],
   user: [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Menú Principal', href: '/', icon: LayoutDashboard },
     { name: 'Documentos', href: '/documents', icon: FileText },
     { name: 'Configuración', href: '/settings', icon: Settings },
   ],
   // Otros roles mantienen navegación básica
   rh: [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Menú Principal', href: '/', icon: LayoutDashboard },
     { name: 'Documentos', href: '/documents', icon: FileText },
     { name: 'Configuración', href: '/settings', icon: Settings },
   ],
   cliente: [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Menú Principal', href: '/', icon: LayoutDashboard },
     { name: 'Documentos', href: '/documents', icon: FileText },
     { name: 'Configuración', href: '/settings', icon: Settings },
   ],
   proveedor: [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Menú Principal', href: '/', icon: LayoutDashboard },
     { name: 'Documentos', href: '/documents', icon: FileText },
     { name: 'Configuración', href: '/settings', icon: Settings },
   ],
   auditoria: [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Menú Principal', href: '/', icon: LayoutDashboard },
     { name: 'Documentos', href: '/documents', icon: FileText },
     { name: 'Configuración', href: '/settings', icon: Settings },
   ],
